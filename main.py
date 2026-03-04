@@ -1,4 +1,10 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+import re
+import json
+from collections import Counter
+from sklearn.feature_extraction.text import CountVectorizer 
+from sklearn.decomposition import LatentDirichletAllocation
 
 # Load dataset
 df = pd.read_csv("dataset_raw_from_webscraping.csv")
@@ -15,11 +21,7 @@ print("Shape:", df.shape)
 # print("\nMissing values:")
 # print(df.isnull().sum())
 
-# ----------------------------
-# COLUMN TRIAGE
-# ----------------------------
-
-columns_to_keep = [
+columns_to_keep = [ # COLUMN TRIAGE
     "title",
     "category",
     "review_count",
@@ -34,27 +36,15 @@ columns_to_keep = [
 
 df = df[columns_to_keep]
 
-#print("\nAfter column selection:", df.shape)
-#print(df.columns)
-
-import re
-
-# ----------------------------
-# REVIEW TEXT CLEANING
-# ----------------------------
-
-def clean_text(text):
+def clean_text(text): # REVIEW TEXT CLEANING
     if pd.isna(text):
         return ""
     
-    # convert to lowercase
-    text = text.lower()
+    text = text.lower()  # convert to lowercase
     
-    # remove punctuation and special characters
-    text = re.sub(r"[^a-zA-Z\s]", " ", text)
+    text = re.sub(r"[^a-zA-Z\s]", " ", text)   # remove punctuation and special characters
     
-    # remove extra spaces
-    text = re.sub(r"\s+", " ", text).strip()
+    text = re.sub(r"\s+", " ", text).strip() # remove extra spaces
     
     return text
 
@@ -66,13 +56,8 @@ df["clean_reviews"] = df["user_reviews"].apply(clean_text)
 
 #print(df["user_reviews"].iloc[0])
 
-import json
 
-# ----------------------------
-# EXTRACT REAL REVIEW TEXT
-# ----------------------------
-
-def extract_descriptions(review_blob):
+def extract_descriptions(review_blob): # EXTRACT REAL REVIEW TEXT
     if pd.isna(review_blob):
         return ""
     
@@ -88,11 +73,7 @@ df["review_text"] = df["user_reviews"].apply(extract_descriptions)
 #print("\nSample extracted review text:")
 #print(df["review_text"].head(3))
 
-# ----------------------------
-# FINAL TEXT NORMALIZATION
-# ----------------------------
-
-def normalize_text(text):
+def normalize_text(text): # FINAL TEXT NORMALIZATION
     if pd.isna(text):
         return ""
     
@@ -106,16 +87,9 @@ df["review_clean"] = df["review_text"].apply(normalize_text)
 #print("\nNormalized review sample:")
 #print(df["review_clean"].head(3))
 
-from collections import Counter
+all_words = " ".join(df["review_clean"]).split() # WORD FREQUENCY (FILTERED)
 
-# ----------------------------
-# WORD FREQUENCY (FILTERED)
-# ----------------------------
-
-all_words = " ".join(df["review_clean"]).split()
-
-# Indonesian stopwords (basic set)
-indo_stopwords = [
+indo_stopwords = [ # Indonesian stopwords (basic set)
     "dan","di","yang","yg","nya","saya","ada","ga","tidak",
     "juga","itu","ini","untuk","dengan","ke","dari","karena",
     "the","it","my","is","in","to","of"
@@ -130,19 +104,12 @@ word_freq = Counter(filtered_words)
 
 #print("\nTop 20 most common words (filtered):")
 #print(word_freq.most_common(20))
-# ----------------------------
+
 # TOPIC MODELING (THEMES)
-# ----------------------------
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.decomposition import LatentDirichletAllocation
-
-
-# remove empty reviews
-texts = df["review_clean"].dropna()
+texts = df["review_clean"].dropna() # remove empty reviews
 texts = texts[texts.str.strip() != ""]
 
-# convert text to document-term matrix
-vectorizer = CountVectorizer(
+vectorizer = CountVectorizer( # convert text to document-term matrix
     max_df=0.95,
     min_df=2,
     stop_words=indo_stopwords
@@ -150,16 +117,14 @@ vectorizer = CountVectorizer(
 
 dtm = vectorizer.fit_transform(texts)
 
-# build LDA model
-lda = LatentDirichletAllocation(
+lda = LatentDirichletAllocation( # build LDA model
     n_components=4,
     random_state=42
 )
 
 lda.fit(dtm)
 
-# show topics
-words = vectorizer.get_feature_names_out()
+words = vectorizer.get_feature_names_out() # show topics
 
 print("\n=== Discovered Review Themes ===")
 
@@ -168,12 +133,9 @@ for idx, topic in enumerate(lda.components_):
     top_words = [words[i] for i in topic.argsort()[-10:]]
     print(", ".join(top_words))
 
-# ----------------------------
-# BUSINESS PERFORMANCE SCORE
-# ----------------------------
 
 # avoid division issues
-df["review_count"] = pd.to_numeric(df["review_count"], errors="coerce").fillna(0)
+df["review_count"] = pd.to_numeric(df["review_count"], errors="coerce").fillna(0) # BUSINESS PERFORMANCE SCORE
 df["review_rating"] = pd.to_numeric(df["review_rating"], errors="coerce").fillna(0)
 
 # simple weighted score
@@ -191,7 +153,7 @@ print(top_businesses.head(10))
 # ----------------------------
 # GEOGRAPHIC VISUALIZATION (TOP SHOPS ONLY)
 # ----------------------------
-import matplotlib.pyplot as plt
+
 
 # Get top shops (example: by number of reviews)
 top_shops = df.sort_values(by="performance_score", ascending=False).head(20)
