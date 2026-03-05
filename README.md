@@ -101,7 +101,7 @@ git clone https://github.com/sarth28/laundry-review-analysis
 cd laundry-review-analysis
 ```
 
-2. Create virtual environment (recommended):
+2. Create virtual environment:
 
 ```
 python -m venv venv
