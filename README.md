@@ -2,7 +2,7 @@
 
 ## 📌 Project Overview
 
-This project analyzes customer reviews of laundry businesses to extract actionable business insights. Using Natural Language Processing (NLP) and topic modeling, the system identifies key service themes and evaluates business performance based on review metrics.
+This project analyzes customer reviews of laundry businesses to extract actionable business insights. Using Natural Language Processing (NLP) and topic modeling, the analysis identifies key service themes and evaluates business performance based on review metrics.
 
 The goal is to help businesses understand customer sentiment and identify areas for improvement.
 
@@ -33,6 +33,7 @@ The goal is to help businesses understand customer sentiment and identify areas 
 ```
 ├── main.py
 ├── requirements.txt
+├── dataset_raw_from_webscraping.csv
 ├── README.md
 └── .gitignore
 ```
@@ -45,7 +46,7 @@ The dataset used in this project was obtained from Kaggle and is distributed und
 
 **Source:** https://www.kaggle.com/datasets/andri04/laundry-places-from-5-biggest-citiesindonesia
 
-The dataset contains publicly available customer review information for laundry businesses.
+The dataset contains publicly available Google review data for laundry businesses across major Indonesian cities.
 
 
 
@@ -96,8 +97,8 @@ This analysis primarily relied on customer review data. Other attributes such as
 1. Clone the repository:
 
 ```
-git clone <your-repo-link>
-cd <repo-name>
+git clone https://github.com/sarth28/laundry-review-analysis
+cd laundry-review-analysis
 ```
 
 2. Create virtual environment (recommended):
