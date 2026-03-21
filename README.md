@@ -123,8 +123,8 @@ Businesses were ranked using a composite score based on:
 ### 1. Clone the repository
 
 ```
-git clone <your-repo-link>
-cd <repo-name>
+git clone https://github.com/sarth28/laundry-review-analysis
+cd laundry-review-analysis
 ```
 
 2. Create virtual environment (recommended):
